@@ -9,6 +9,9 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         File file = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena.png");
+        File fileTwo = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena2.png");
+        File fileThree = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena3.png");
+        File fileFour = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena4.png");
         BufferedImage img = ImageIO.read(file);
         int width = img.getWidth();
         int height = img.getHeight();
@@ -20,117 +23,102 @@ public class Main {
             }
         }
 
-        float[][] imgOne = new float[256][256];
-        float[][] imgTwo = new float[256][256];
-        float[][] imgThree = new float[256][256];
-        float[][] imgFour = new float[256][256];
-        float[][] block = new float[8][8];
-        String[] rowsOne = new String[256];
-        String[] rowsTwo = new String[256];
+        float[][] imgOne = new float[512][512];
+        float[][] imgTwo = new float[512][512];
+        float[][] imgThree = new float[512][512];
+        float[][] imgFour = new float[512][512];
+        int[][] first = new int[512][512];
+        int[][] second = new int[512][512];
+        int[][] third = new int[512][512];
+        BufferedImage image = img;
 
-        for (int i = 0; i < 256; i++) {
-            for (int j = 0; j < 256; j++) {
+        for (int i = 0; i < 512; i++) {
+            for (int j = 0; j < 512; j++) {
                 imgOne[i][j] = (float) imgArr[i][j];
             }
         }
 
-        System.out.println("Original block------------------------------------------");
-        for(int i = 248; i < 256; i++) {
-            for(int j = 248; j < 256; j++) {
-                if(rowsOne[i] == null){rowsOne[i] = String.valueOf(imgOne[i][j]) + ", ";}
-                else {rowsOne[i] = rowsOne[i] + String.valueOf(imgOne[i][j]) + ", ";}
-            }
-            System.out.println(rowsOne[i]);
-        }
+        float[][] temp = createCopy(imgOne);
+        imgTwo = compressImage(temp, 256);
+        temp = createCopy(imgTwo);
+        imgThree = compressImage(temp, 128);
+        temp = createCopy(imgThree);
+        imgFour = compressImage(temp, 64);
 
-        int indexI = 0, indexJ = 0;
-        for(int i = 0; i < 32; i++){
-            indexJ = 0;
-            for(int j = 0; j < 32; j++){
-                block = compressBlock(imgOne, indexI, indexJ);
-                for (int k = 0; k < 8; k++){
-                    for (int h = 0; h < 8; h++){
-                        imgTwo[k + indexI][h + indexJ] = block[k][h];
-                    }
-                }
-                indexJ += 8;
-            }
-            indexI += 8;
-        }
-
-        System.out.println("Second Block------------------------------------------");
-        for(int i = 248; i < 256; i++) {
-            for(int j = 248; j < 256; j++) {
-                if(rowsTwo[i] == null){rowsTwo[i] = String.valueOf(imgTwo[i][j]) + ", ";}
-                else {rowsTwo[i] = rowsTwo[i] + String.valueOf(imgTwo[i][j]) + ", ";}
-            }
-            System.out.println(rowsTwo[i]);
-        }
-
-
-        int[] tempArr = new int[1];
-        int[][] outArr = imgArr;
-        outArr = addSubImage(outArr, imgTwo);
-        BufferedImage image = img;
-        WritableRaster wraster = (WritableRaster) image.getRaster();
-        for(int i = 0; i < 256; i++){
-            for(int j = 0; j < 256; j++){
-                tempArr[0] = outArr[i][j];
-                wraster.setPixel(i, j, tempArr);
-            }
-        }
-        image.setData(wraster);
-
-        File fileTwo = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena2.png");
-        ImageIO.write(image, "png", fileTwo);
+        writeToImage(fileTwo, img, convertToInt(imgTwo));
+        writeToImage(fileThree, img, convertToInt(imgThree));
+        writeToImage(fileFour, img, convertToInt(imgFour));
     }
 
-    private static float[][] compressBlock (float[][] imgArr, int startI, int startJ){
-        float[][] returnBlock = new float[8][8];
+    private static int[][] convertToInt(float[][] imgArr) {
+        int[][] returnArr = new int[512][512];
+        for(int i = 0; i < 512; i++){
+            for(int j = 0; j < 512; j++){
+                returnArr[i][j] = (int)imgArr[i][j];
+            }
+        }
+        return returnArr;
+    }
+
+    private static float[][] createCopy(float[][] imgArr) {
+        float[][] returnArr = new float[512][512];
+        for(int i = 0; i < 512; i++){
+            for(int j = 0; j < 512; j++){
+                returnArr[i][j] = imgArr[i][j];
+            }
+        }
+        return returnArr;
+    }
+
+    private static float[][] compressImage (float[][] imgArr, int size){
+        float[][] returnBlock = createCopy(imgArr);
         int pairIndex;
-        for(int i = 0; i < 8; i++){
+        for(int i = 0; i < size*2; i++){
             pairIndex = 0;
-            for(int j = 0; j < 4; j++){
-                returnBlock[i][j] = (imgArr[i + startI][pairIndex + startJ] + imgArr[i + startI][pairIndex + 1 + startJ]) / 2;
-                returnBlock[i][j+4] = (imgArr[i + startI][pairIndex + startJ] - imgArr[i + startI][pairIndex + 1 + startJ]) / 2;
+            for(int j = 0; j < size; j++){
+                returnBlock[i][j] = (imgArr[i][pairIndex] + imgArr[i][pairIndex + 1]) / 2;
+                returnBlock[i][j+size] = (imgArr[i][pairIndex] - imgArr[i][pairIndex + 1]) / 2;
                 pairIndex += 2;
             }
         }
-        float[][] temp = returnBlock;
-        for(int j = 0; j < 8; j++){
+        float[][] temp = createCopy(returnBlock);
+        for(int j = 0; j < size*2; j++){
             pairIndex = 0;
-            for(int i = 0; i < 4; i++){
+            for(int i = 0; i < size; i++){
                 returnBlock[i][j] = (temp[pairIndex][j] + temp[pairIndex + 1][j]) / 2;
-                returnBlock[i+4][j] = (temp[pairIndex][j] - temp[pairIndex + 1][j]) / 2;
+                returnBlock[i+size][j] = (temp[pairIndex][j] - temp[pairIndex + 1][j]) / 2;
                 pairIndex += 2;
             }
         }
         return returnBlock;
     }
 
-    private static int[][] addSubImage(int[][] outArr, float[][] compressedArr){
-        int[][] tempArr = new int[128][128];
-        for(int i= 0; i < 256; i++) {
-            for (int j = 0; j < 256; j++) {
-                outArr[i][j] = outArr[i][j];
+    private static int[][] addSubImage(int[][] img, float[][] compressedArr, int size){
+        for(int i= 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                img[i][j] = (int) compressedArr[i][j];
             }
         }
+        return img;
+    }
 
-        for(int i= 0; i < 32; i++){
-            for (int j = 0; j < 32; j++){
-                for(int h = 0; h < 4; h++){
-                    for(int k = 0; k < 4; k++){
-                        tempArr[(i*4)+h][(j*4)+k] = (int) compressedArr[(i*8)+h][(j*8)+k];
-                    }
-                }
+    private static void writeToImage(File file, BufferedImage image, int[][] imgArr){
+        int[] pixelArr = new int[4];
+        pixelArr[3] = 255;
+        WritableRaster raster = (WritableRaster) image.getRaster();
+        for(int i = 0; i < 512; i++){
+            for(int j = 0; j < 512; j++){
+                pixelArr[0] = imgArr[i][j];
+                pixelArr[1] = imgArr[i][j];
+                pixelArr[2] = imgArr[i][j];
+                raster.setPixel(i, j, pixelArr);
             }
         }
-        for(int i= 0; i < 128; i++) {
-            for (int j = 0; j < 128; j++) {
-                outArr[i][j] = tempArr[i][j];
-            }
+        image.setData(raster);
+        try {
+            ImageIO.write(image, "png", file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        return outArr;
     }
 }
