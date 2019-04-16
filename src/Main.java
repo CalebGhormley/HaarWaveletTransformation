@@ -93,15 +93,6 @@ public class Main {
         return returnBlock;
     }
 
-    private static int[][] addSubImage(int[][] img, float[][] compressedArr, int size){
-        for(int i= 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                img[i][j] = (int) compressedArr[i][j];
-            }
-        }
-        return img;
-    }
-
     private static void writeToImage(File file, BufferedImage image, int[][] imgArr){
         int[] pixelArr = new int[4];
         pixelArr[3] = 255;
