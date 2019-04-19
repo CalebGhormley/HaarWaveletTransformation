@@ -23,22 +23,19 @@ public class Main {
             }
         }
 
-        float[][] imgOne = new float[512][512];
-        float[][] imgTwo = new float[512][512];
-        float[][] imgThree = new float[512][512];
-        float[][] imgFour = new float[512][512];
-        int[][] first = new int[512][512];
-        int[][] second = new int[512][512];
-        int[][] third = new int[512][512];
+        double[][] imgOne = new double[512][512];
+        double[][] imgTwo = new double[512][512];
+        double[][] imgThree = new double[512][512];
+        double[][] imgFour = new double[512][512];
         BufferedImage image = img;
 
         for (int i = 0; i < 512; i++) {
             for (int j = 0; j < 512; j++) {
-                imgOne[i][j] = (float) imgArr[i][j];
+                imgOne[i][j] = (double) imgArr[i][j];
             }
         }
 
-        float[][] temp = createCopy(imgOne);
+        double[][] temp = createCopy(imgOne);
         imgTwo = compressImage(temp, 256);
         temp = createCopy(imgTwo);
         imgThree = compressImage(temp, 128);
@@ -50,7 +47,7 @@ public class Main {
         writeToImage(fileFour, img, convertToInt(imgFour));
     }
 
-    private static int[][] convertToInt(float[][] imgArr) {
+    private static int[][] convertToInt(double[][] imgArr) {
         int[][] returnArr = new int[512][512];
         for(int i = 0; i < 512; i++){
             for(int j = 0; j < 512; j++){
@@ -60,8 +57,8 @@ public class Main {
         return returnArr;
     }
 
-    private static float[][] createCopy(float[][] imgArr) {
-        float[][] returnArr = new float[512][512];
+    private static double[][] createCopy(double[][] imgArr) {
+        double[][] returnArr = new double[512][512];
         for(int i = 0; i < 512; i++){
             for(int j = 0; j < 512; j++){
                 returnArr[i][j] = imgArr[i][j];
@@ -70,23 +67,23 @@ public class Main {
         return returnArr;
     }
 
-    private static float[][] compressImage (float[][] imgArr, int size){
-        float[][] returnBlock = createCopy(imgArr);
+    private static double[][] compressImage (double[][] imgArr, int size){
+        double[][] returnBlock = createCopy(imgArr);
         int pairIndex;
         for(int i = 0; i < size*2; i++){
             pairIndex = 0;
             for(int j = 0; j < size; j++){
                 returnBlock[i][j] = (imgArr[i][pairIndex] + imgArr[i][pairIndex + 1]) / 2;
-                returnBlock[i][j+size] = (imgArr[i][pairIndex] - imgArr[i][pairIndex + 1]) / 2;
+                returnBlock[i][j+size] = ((imgArr[i][pairIndex] - imgArr[i][pairIndex + 1]) / 2) + 100;
                 pairIndex += 2;
             }
         }
-        float[][] temp = createCopy(returnBlock);
+        double[][] temp = createCopy(returnBlock);
         for(int j = 0; j < size*2; j++){
             pairIndex = 0;
             for(int i = 0; i < size; i++){
                 returnBlock[i][j] = (temp[pairIndex][j] + temp[pairIndex + 1][j]) / 2;
-                returnBlock[i+size][j] = (temp[pairIndex][j] - temp[pairIndex + 1][j]) / 2;
+                returnBlock[i+size][j] = ((temp[pairIndex][j] - temp[pairIndex + 1][j]) / 2) + 100;
                 pairIndex += 2;
             }
         }
