@@ -1,17 +1,27 @@
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        File file = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena.png");
-        File fileTwo = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena2.png");
-        File fileThree = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena3.png");
-        File fileFour = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\lena4.png");
+        Scanner stdin = new Scanner(System.in);
+        System.out.println("Enter the name of the picture you would like to perform haar wavelet transformation on:");
+        String name = stdin.nextLine();
+        File file = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\" + name + ".png");
+        File fileTwo = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\image2.png");
+        File fileThree = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\image3.png");
+        File fileFour = new File("C:\\Users\\caleb\\source\\repos\\HaarWaveletTransformation\\src\\image4.png");
         BufferedImage img = ImageIO.read(file);
         int width = img.getWidth();
         int height = img.getHeight();
@@ -45,6 +55,9 @@ public class Main {
         writeToImage(fileTwo, img, convertToInt(imgTwo));
         writeToImage(fileThree, img, convertToInt(imgThree));
         writeToImage(fileFour, img, convertToInt(imgFour));
+
+        printPicture(ImageIO.read(file), false);
+        printPicture(ImageIO.read(fileFour), true);
     }
 
     private static int[][] convertToInt(double[][] imgArr) {
@@ -108,5 +121,17 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void printPicture(BufferedImage image, Boolean fin){
+        ImageIcon icon=new ImageIcon(image);
+        JFrame frame=new JFrame();
+        frame.setLayout(new FlowLayout());
+        frame.setSize(512,512);
+        JLabel lbl=new JLabel();
+        lbl.setIcon(icon);
+        frame.add(lbl);
+        frame.setVisible(true);
+        if(fin){frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);}
     }
 }
